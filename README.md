@@ -187,8 +187,7 @@
 
 - Номера могут быть связаны с множеством услуг (многие ко многим).
 
-![hotel - hotel.pdf](https://github.com/Weta-Lana/bd/blob/bd/hotel%20-%20hotel.pdf)
-
+![hotel - hotel.png](https://github.com/Weta-Lana/bd/blob/bd/hotel%20-%20hotel.png)
 
 
 
