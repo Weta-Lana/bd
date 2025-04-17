@@ -186,8 +186,8 @@
 - Каждое бронирование связано с одним номером (многие к одному).
 
 - Номера могут быть связаны с множеством услуг (многие ко многим).
-- 
-[hotel - hotel.pdf](https://github.com/user-attachments/files/19790019/hotel.-.hotel.pdf)
+
+[hotel - hotel.pdf](https://github.com/Weta-Lana/bd/blob/bd/hotel%20-%20hotel.pdf)
 
 
 
