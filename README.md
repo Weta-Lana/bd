@@ -113,8 +113,8 @@
 Цель работы состоит в создании оптимальной базы данных, позволяющей улучшить процессы бронирования, учёта клиентов и управления номерами, что, в свою очередь, будет способствовать повышению конкурентоспособности гостиничного бизнеса и улучшению клиентского опыта.
 
 
-## 1. Анализ предметной области. Постановка задачи.
-### 1.1 Описание предметной области и функции решаемых задач.
+## Анализ предметной области. Постановка задачи.
+### Описание предметной области и функции решаемых задач.
 Предметная область: Система управления гостиницей, включающая управление номерами, клиентами, бронированиями и платежами.
 
 Основные функции, решаемые в рамках задачи:
@@ -129,7 +129,7 @@
 
 Задача состоит в автоматизации процесса управления гостиницей с целью упрощения обработки данных и уменьшения ошибок, связанных с ручным ведением учета.
 
-### 1.2. Перечень входных данных.
+### Перечень входных данных.
 
 Входные данные для системы включают:
 
@@ -179,7 +179,7 @@
 
 - Статус платежа (например, "завершено", "в процессе")
 
-### 1.3. Перечень выходных данных.
+### Перечень выходных данных.
 
 Выходные данные системы включают:
 
@@ -201,7 +201,7 @@
 #### Отчеты по платежам:
 статистика по платежам, включая общую сумму, статус платежей и методы оплаты.
 
-### 1.4. Ограничения предметной области.
+### Ограничения предметной области.
 
 #### Ограничение на количество номеров:
 количество номеров в гостинице ограничено физическим количеством комнат. Каждому номеру присваивается уникальный идентификатор.
@@ -218,7 +218,7 @@
 #### Ограничения на платежи:
 система может поддерживать различные способы оплаты, но необходимо учитывать ограничения, связанные с типами методов оплаты.
 
-### 1.5. Взаимодействие с другими программами.
+### Взаимодействие с другими программами.
 
 Система управления гостиницей может взаимодействовать с другими программами через:
 
@@ -298,7 +298,7 @@
 
 ## Реализация проекта в среде конкретной СУБД.
 
-#### 5.1. Создание таблиц
+#### Создание таблиц
 ```
 
 CREATE TABLE clients (
@@ -348,7 +348,7 @@ CREATE TABLE payments (
 );
 ```
 
-### 5.2. Создание запросов
+### Создание запросов
 
 Добавление клиента:
 
@@ -401,4 +401,238 @@ WHERE id = 1;
 ```
 DELETE FROM bookings
 WHERE id = 1;
+```
+
+
+### Разработка интерфейса
+
+Главная страница:
+
+```
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Гостиница</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>Добро пожаловать в систему управления гостиницей</h1>
+    <nav>
+        <ul>
+            <li><a href="{{ url_for('clients') }}">Клиенты</a></li>
+            <li><a href="{{ url_for('bookings') }}">Бронирования</a></li>
+            <li><a href="{{ url_for('rooms') }}">Номера</a></li>
+            <li><a href="{{ url_for('payments') }}">Оплата</a></li>
+        </ul>
+    </nav>
+</body>
+</html>
+```
+
+Страница клиентов:
+
+```
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Клиенты</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>Список клиентов</h1>
+    <a href="{{ url_for('add_client') }}">Добавить клиента</a>
+
+    <!-- Кнопка для возврата на главную страницу -->
+    <a href="{{ url_for('index') }}">
+        <button>Вернуться на главную</button>
+    </a>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>ФИО</th>
+                <th>Номер паспорта</th>
+                <th>Телефон</th>
+                <th>Электронная почта</th>
+                <th>Адрес</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for client in clients %}
+            <tr>
+                <td>{{ client.full_name }}</td>
+                <td>{{ client.passport_number }}</td>
+                <td>{{ client.phone }}</td>
+                <td>{{ client.email }}</td>
+                <td>{{ client.address }}</td>
+                <td>
+                    <!-- Кнопка для показа формы редактирования -->
+                    <button onclick="toggleForm('form_{{ client.id }}')">Редактировать</button>
+
+                    <!-- Скрытая форма для редактирования -->
+                    <div id="form_{{ client.id }}" style="display:none;">
+                        <form method="POST">
+                            <input type="hidden" name="client_id" value="{{ client.id }}">
+                            <input type="text" name="full_name" value="{{ client.full_name }}" required><br>
+                            <input type="text" name="passport_number" value="{{ client.passport_number }}" required><br>
+                            <input type="text" name="phone" value="{{ client.phone }}" required><br>
+                            <input type="email" name="email" value="{{ client.email }}"><br>
+                            <textarea name="address" required>{{ client.address }}</textarea><br>
+                            <button type="submit" name="edit_client">Сохранить</button>
+                        </form>
+                    </div>
+
+                    <!-- Форма для удаления -->
+                    <form method="POST" style="display:inline;">
+                        <input type="hidden" name="client_id" value="{{ client.id }}">
+                        <button type="submit" name="delete_client" onclick="return confirm('Вы уверены, что хотите удалить клиента?')">Удалить</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- JavaScript для показа и скрытия формы редактирования -->
+    <script>
+    function toggleForm(formId) {
+        var form = document.getElementById(formId);
+        if (form.style.display === "none") {
+            form.style.display = "block";
+        } else {
+            form.style.display = "none";
+        }
+    }
+    </script>
+</body>
+</html>
+```
+
+Страница бронирований:
+
+```
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Бронирования</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>Список бронирований</h1>
+    <a href="{{ url_for('add_booking') }}">Добавить бронирование</a>
+    
+    <!-- Кнопка для возврата на главную страницу -->
+    <a href="{{ url_for('index') }}">
+        <button>Вернуться на главную</button>
+    </a>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Клиент</th>
+                <th>Номер</th>
+                <th>Дата заезда</th>
+                <th>Дата выезда</th>
+                <th>Статус</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for booking in bookings %}
+            <tr>
+                <td>{{ booking.client.full_name }}</td>
+                <td>{{ booking.room.room_number }}</td>  <!-- Здесь будет доступ к атрибуту room -->
+                <td>{{ booking.check_in_date }}</td>
+                <td>{{ booking.check_out_date }}</td>
+                <td>{{ booking.status }}</td>
+                <td>
+                    <!-- Кнопка для показа формы редактирования -->
+                    <button onclick="toggleForm('form_{{ booking.id }}')">Редактировать</button>
+
+                    <!-- Скрытая форма для редактирования -->
+                    <div id="form_{{ booking.id }}" style="display:none;">
+                        <form method="POST">
+                            <input type="hidden" name="booking_id" value="{{ booking.id }}">
+                            <label for="check_in_date">Дата заезда:</label>
+                            <input type="date" name="check_in_date" value="{{ booking.check_in_date }}" required><br>
+                            <label for="check_out_date">Дата выезда:</label>
+                            <input type="date" name="check_out_date" value="{{ booking.check_out_date }}" required><br>
+                            <label for="status">Статус:</label>
+                            <select name="status" id="status" required>
+                                <option value="Забронировано" {% if booking.status == 'Забронировано' %}selected{% endif %}>Забронировано</option>
+                                <option value="В процессе" {% if booking.status == 'В процессе' %}selected{% endif %}>В процессе</option>
+                                <option value="Завершено" {% if booking.status == 'Завершено' %}selected{% endif %}>Завершено</option>
+                            </select><br>
+                            <button type="submit" name="edit_booking">Сохранить</button>
+                        </form>
+                    </div>
+
+                    <!-- Форма для удаления -->
+                    <form method="POST" style="display:inline;">
+                        <input type="hidden" name="booking_id" value="{{ booking.id }}">
+                        <button type="submit" name="delete_booking" onclick="return confirm('Вы уверены, что хотите удалить бронирование?')">Удалить</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- JavaScript для показа и скрытия формы редактирования -->
+    <script>
+    function toggleForm(formId) {
+        var form = document.getElementById(formId);
+        if (form.style.display === "none") {
+            form.style.display = "block";
+        } else {
+            form.style.display = "none";
+        }
+    }
+    </script>
+</body>
+</html>
+```
+## Разработка стратегии резервного копирования базы данных
+
+#### Типы резервных копий:
+
+- Полные резервные копии: создаются еженедельно для всего содержимого базы данных.
+
+- Инкрементальные копии: создаются ежедневно, чтобы сохранять только изменения с последнего резервного копирования.
+
+#### Частота копирования:
+
+- Полное резервное копирование — каждую неделю.
+
+- Инкрементальное копирование — каждый день (например, в ночное время).
+
+#### Реализация:
+
+Использовать встроенные инструменты PostgreSQL для создания резервных копий:
+
+- pg_dump — для создания резервных копий базы данных.
+
+- pg_basebackup — для создания физической резервной копии базы данных.
+
+#### Пример для полного резервного копирования с помощью pg_dump:
+
+```
+pg_dump -U username -F c -b -v -f /path/to/backup/db_backup.sqlc dbname
+```
+
+#### Хранение резервных копий:
+
+- Хранить резервные копии на отдаленном сервере или в облачном хранилище для безопасности.
+
+#### Восстановление данных:
+
+```
+pg_restore -U username -d dbname /path/to/backup/db_backup.sqlc
 ```
